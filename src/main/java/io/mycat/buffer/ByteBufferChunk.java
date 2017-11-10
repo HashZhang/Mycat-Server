@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
  * @time 17:19 2016/5/17
  * @see @https://github.com/netty/netty
  */
-public class ByteBufferChunk implements Comparable{
+public class ByteBufferChunk implements Comparable<ByteBufferChunk>{
     private static final Logger LOGGER = LoggerFactory.getLogger(ByteBufferChunk.class);
     private final byte[] memoryMap;
     private final byte[] depthMap;
@@ -225,43 +225,18 @@ public class ByteBufferChunk implements Comparable{
         return Integer.SIZE - 1 - Integer.numberOfLeadingZeros(chunkSize);
     }
 
-    private void printMemoryMap() {
-        int l = 1;
-        for (int i = 0; i < this.maxOrder; i++) {
-            int j = (int) Math.pow(2, i);
-            for (int k = 0; k < j; k++) {
-                System.out.print(this.memoryMap[l] + "|");
-                l++;
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
-
-    public static void main(String[] args) {
-
-        int pageSize = 256;
-        int chunkSize = 1024 * 1024 * 64;
-        ByteBufferChunk byteBufferChunk = new ByteBufferChunk(pageSize, chunkSize);
-        int chunkCount = 8;
-        int allocTimes = 102400;
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < allocTimes; i++) {
-//            System.out.println("allocate "+i);
-//            long start=System.nanoTime();
-            int size = 256;
-            ByteBuffer byteBufer = byteBufferChunk.allocateRun(size);
-//            System.out.println("alloc "+size+" usage "+(System.nanoTime()-start));
-//            start=System.nanoTime();
-//            byteBufferArena.recycle(byteBufer);
-//            System.out.println("recycle usage "+(System.nanoTime()-start));
-        }
-        long used = (System.currentTimeMillis() - start);
-        System.out.println("total used time  " + used + " avg speed " + allocTimes / used);
-    }
-
     @Override
-    public int compareTo(Object o) {
-        return -1;
+    public int compareTo(ByteBufferChunk o) {
+        if (bufAddress > o.bufAddress) {
+            return 1;
+        } else if (bufAddress < o.bufAddress)  {
+            return -1;
+        } else {
+            if (this.hashCode() != o.hashCode()) {
+                return this.hashCode() - o.hashCode();
+            } else {
+                return -1;
+            }
+        }
     }
 }
